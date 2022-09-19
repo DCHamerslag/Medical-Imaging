@@ -1,6 +1,10 @@
 import torch.nn as nn
 import pretrainedmodels as pm
 
+def get_model(name: str):
+    if name=="ResNet50":
+        return get_pretrained_resnet50()
+
 def get_pretrained_resnet50():
 
     model = pm.__dict__["resnet50"](pretrained='imagenet')
