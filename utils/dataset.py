@@ -6,6 +6,7 @@ from typing import Dict, Union
 import torch
 from utils.paths import DATA
 
+
 class AIROGSLiteDataset(Dataset):
 
     def __init__(self, transform: transform = None) -> None:
@@ -23,9 +24,9 @@ class AIROGSLiteDataset(Dataset):
         assert (label=="NRG") or (label=="RG")
 
         if label == 'NRG':  
-            label = False
+            label = [1, 0]
         else: 
-            label = True
+            label = [0, 1]
         label = np.array(label)
         img_path = np.array(img_path)
         sample = {
