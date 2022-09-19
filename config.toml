@@ -1,4 +1,4 @@
-device = "cpu"
+device = "cuda"
 num_epochs = 10
 test = 20000
 model = "ResNet50"

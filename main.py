@@ -24,14 +24,18 @@ def main(args):
         wandb.config.update(args)
 
     transform = transforms.Compose([
-        Rescale((200, 200)),
+        Rescale((1000, 1000)),
         ToTensor()
     ])
     training_config = {}
     dataset = AIROGSLiteDataset(transform)
-   
-
-    model = get_model(args.model).to(args.device)
+    if args.device=="cuda":
+        print("Using device: ", torch.cuda.get_device_name(0))
+        device = torch.device(0)
+    else:
+        print("Using device: cpu")
+        device = torch.device('cpu')
+    model = get_model(args.model).to(device)
 
     plist = [
             {'params': model.layer4.parameters(), 'lr': 1e-5},
@@ -45,7 +49,7 @@ def main(args):
     training_config['dataset_size'] = len(dataset)
     training_config['num_epochs'] = args.num_epochs
     training_config['loss_fn'] = nn.BCEWithLogitsLoss()
-    training_config['device'] = args.device
+    training_config['device'] = device
     training_config['logging'] = args.logging
 
  
