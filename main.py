@@ -5,7 +5,7 @@ from torchvision import transforms, utils
 
 def main():
     trsfm = transforms.Compose([
-        Rescale((300, 300)),
+        Rescale((30, 300)),
         ToTensor()
     ])
     dataset = AIROGSLiteDataset(transform=trsfm)
