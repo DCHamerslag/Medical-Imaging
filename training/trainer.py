@@ -1,6 +1,7 @@
 from typing import Dict
 import torch
 import wandb
+from tqdm import tqdm
 
 class Trainer():
     def __init__(self, config: Dict):
@@ -13,17 +14,19 @@ class Trainer():
         self.loss_fn = config['loss_fn']
         self.device = config['device']
         self.logging = config['logging']
+        self.batch_size = config['batch_size']
 
-    def train(self) -> any: # idk model datatype
+    def train(self) -> any:
 
-        for epoch in range(self.num_epochs):
-            print('Epoch {}/{}'.format(epoch, self.num_epochs - 1))
-            print('-' * 10)
+        training_progress_bar = tqdm(total=int(self.dataset_size / self.batch_size), desc="Training progress")
+        for epoch in tqdm(range(self.num_epochs - 1), "Epoch"):
+            training_progress_bar.reset()
 
             self.model.train()
 
             running_loss = 0.0
             for batch_index, batch in enumerate(self.dataloader):
+                training_progress_bar.update()
                 inputs = batch["image"]
                 labels = batch["label"]
                 inputs = inputs.to(self.device, dtype=torch.float)
@@ -38,9 +41,10 @@ class Trainer():
 
                 self.scheduler.step()
                 running_loss += loss.item() * inputs.size(0)
-                print('Current loss: {:.4f}'.format(loss))
+                training_progress_bar.set_postfix(loss=loss.item())
                 if self.logging: wandb.log({"Loss" : loss})
             epoch_loss = running_loss / self.dataset_size
-            print('Loss: {:.4f}'.format(epoch_loss))
+            #print('Epoch Loss: {:.4f}'.format(epoch_loss))
+            if self.logging: wandb.log({"Epoch loss" : epoch_loss})
 
         return self.model

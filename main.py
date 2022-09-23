@@ -50,6 +50,7 @@ def main(args):
     training_config['loss_fn'] = loss_fn
     training_config['device'] = device
     training_config['logging'] = args.logging
+    training_config['batch_size'] = args.batch_size
 
     trainer = Trainer(training_config)
     model = trainer.train()
