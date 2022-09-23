@@ -1,5 +1,4 @@
-[parameters]
-device = "cpu"
+device = "cuda"
 num_epochs = 10
 model = "ResNet50"
 rescale_w = 200

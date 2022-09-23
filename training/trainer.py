@@ -30,7 +30,6 @@ class Trainer():
                 labels = labels.to(self.device, dtype=torch.float)
 
                 self.optimizer.zero_grad()
-
                 with torch.set_grad_enabled(True):
                     outputs = self.model(inputs)
                     loss = self.loss_fn(outputs, labels)
