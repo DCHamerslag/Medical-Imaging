@@ -21,10 +21,12 @@ def main(args):
         wandb.init(project="test", entity="dchamerslag")
         wandb.config.update(args)
 
-    if args.device=="cpu":
-        device = torch.device("cpu")
-    else:
+    if args.device=="cuda":
+        print("Using device: ", torch.cuda.get_device_name(0))
         device = torch.device(0)
+    else:
+        print("Using device: cpu")
+        device = torch.device('cpu')
 
     # Rescale images (they are all variable dimensions)
     transform = transforms.Compose([
