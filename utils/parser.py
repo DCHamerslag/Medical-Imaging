@@ -2,7 +2,7 @@ from argparse import ArgumentParser, Namespace
 import argparse 
 import os
 from typing import Dict
-from utils.paths import ROOT
+from utils.paths import ROOT, DATA
 import toml
 
 def parse_args() -> Namespace:
@@ -11,12 +11,21 @@ def parse_args() -> Namespace:
                         dest='logging',
                         action='store_true', 
                         default=False)
+    parser.add_argument( '--data_dir', action = 'store', 
+                        type = str, 
+                        help = 'Datadir',
+                        default="Default")
+
 
     args = parser.parse_args()
     toml_config = toml.load(str(ROOT / "config.toml"))
     parameters = {**toml_config['parameters'], **vars(args)}
     parameters = Namespace(**parameters)
+    if parameters.data_dir == "Default":
+        parameters.data_dir = str(DATA)
     check(parameters, toml_config)
+
+
     return parameters
 
 def check(parameters: Namespace, toml_config: Dict) -> None:

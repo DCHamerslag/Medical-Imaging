@@ -33,7 +33,7 @@ def main(args):
         Rescale((args.rescale_w, args.rescale_h)),
         ToTensor()
     ])
-    dataset = AIROGSLiteDataset(transform)
+    dataset = AIROGSLiteDataset(args, transform)
    
     model, optimizer, scheduler = get_model(args.model)
     loss_fn = nn.BCEWithLogitsLoss()
