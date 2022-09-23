@@ -191,7 +191,5 @@ dependencies:
     - urllib3==1.26.12
     - wandb==0.13.3
     - wrapt==1.12.1
-    - libgfortran==3.0.1
     - appnope==0.1.2
-    - llvm-openmp==12.0.0
 prefix: /opt/miniconda3/envs/ai
