@@ -14,7 +14,6 @@ class Trainer():
         self.device = config['device']
         self.logging = config['logging']
 
-
     def train(self) -> any: # idk model datatype
 
         for epoch in range(self.num_epochs):

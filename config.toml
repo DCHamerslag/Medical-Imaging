@@ -1,4 +1,11 @@
+[parameters]
 device = "cpu"
 num_epochs = 10
-test = 20000
 model = "ResNet50"
+rescale_w = 200
+rescale_h = 200
+
+[implemented]
+models = [
+    "ResNet50", "test"
+]
