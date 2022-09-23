@@ -4,6 +4,8 @@ num_epochs = 10
 model = "ResNet50"
 rescale_w = 200
 rescale_h = 200
+batch_size = 4
+num_workers = 4
 
 [implemented]
 models = [

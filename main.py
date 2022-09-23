@@ -37,7 +37,7 @@ def main(args):
    
     model, optimizer, scheduler = get_model(args.model)
     loss_fn = nn.BCEWithLogitsLoss()
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True, num_workers=4)
+    dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
     model = model.to(device)
 
     training_config = {}
