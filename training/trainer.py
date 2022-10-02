@@ -19,9 +19,9 @@ class Trainer():
 
     def train(self):
 
-        training_progress_bar = tqdm(total=int(self.dataset_size / self.batch_size), desc="Training progress")
+        train_pb = tqdm(total=int(self.dataset_size / self.batch_size), desc="Training progress")
         for epoch in tqdm(range(self.num_epochs - 1), "Epoch"):
-            training_progress_bar.reset()
+            train_pb.reset()
 
             self.model.train()
 
@@ -29,7 +29,7 @@ class Trainer():
             
             correct = {}
             for batch_index, batch in enumerate(self.dataloader):
-                training_progress_bar.update()
+                train_pb.update()
                 inputs = batch["image"]
                 labels = batch["label"]
                 inputs = inputs.to(self.device, dtype=torch.float)
@@ -56,7 +56,7 @@ class Trainer():
                 acc = (true_pos + true_neg) / self.batch_size
                 #print(f"True pos {true_pos}, true neg: {true_neg}")
                 running_loss += loss.item() * inputs.size(0)
-                training_progress_bar.set_postfix(loss=loss.item(), acc=acc.item())
+                train_pb.set_postfix(loss=loss.item(), acc=acc.item())
                 if self.logging: 
                     wandb.log({"Loss" : loss,
                                 "TP" : true_pos,
