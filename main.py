@@ -1,5 +1,9 @@
 
 
+from tkinter import W
+from typing import Dict, List
+
+from cv2 import transform
 from utils.dataset import AIROGSLiteDataset, Rescale, ToTensor
 from torch.utils.data import DataLoader
 from torchvision import transforms, utils
@@ -33,19 +37,21 @@ def main(args):
         Rescale((args.rescale_w, args.rescale_h)),
         ToTensor()
     ])
-    dataset = AIROGSLiteDataset(args, transform)
+    split = [13000, 2000]
    
     model, optimizer, scheduler = get_model(args.model)
     loss_fn = nn.BCEWithLogitsLoss()
-    dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    
+    train_loader, test_loader = create_dataloaders(args, transform, split)
     model = model.to(device)
 
     training_config = {}
-    training_config['dataloader'] = dataloader
+    training_config['dataloader'] = train_loader
+    training_config['test_dataloader'] = test_loader
     training_config['model'] = model
     training_config['optimizer'] = optimizer
     training_config['scheduler'] = scheduler
-    training_config['dataset_size'] = len(dataset)
+    training_config['dataset_size'] = split[0]
     training_config['num_epochs'] = args.num_epochs
     training_config['loss_fn'] = loss_fn
     training_config['device'] = device
@@ -56,6 +62,15 @@ def main(args):
     model = trainer.train()
 
     torch.save(model.state_dict(), "model.bin")
+
+def create_dataloaders(args: Dict, transform: transform, split: List):
+    
+    dataset = AIROGSLiteDataset(args, transform)
+    train_set, test_set = torch.utils.data.random_split(dataset, split)
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+    
+    return train_loader, test_loader
 
 if __name__ == "__main__":  
     args = parse_args()

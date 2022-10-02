@@ -1,10 +1,10 @@
 [parameters]
-device = "cpu"
+device = "cuda"
 num_epochs = 10
 model = "ResNet50"
-rescale_w = 200
-rescale_h = 200
-batch_size = 4
+rescale_w = 500
+rescale_h = 500
+batch_size = 8
 num_workers = 4
 
 [implemented]

@@ -5,7 +5,7 @@ from skimage import io, transform
 from typing import Dict, Union
 import torch
 from utils.paths import DATA
-
+from PIL import Image
 
 class AIROGSLiteDataset(Dataset):
 

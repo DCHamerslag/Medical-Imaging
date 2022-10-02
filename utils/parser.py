@@ -19,8 +19,8 @@ def parse_args() -> Namespace:
 
     args = parser.parse_args()
     toml_config = toml.load(str(ROOT / "config.toml"))
-    parameters = {**toml_config['parameters'], **vars(args)}
-    parameters = Namespace(**parameters)
+    merge = {**toml_config['parameters'], **vars(args)}
+    parameters = Namespace(**merge)
     if parameters.data_dir == "Default":
         parameters.data_dir = str(DATA)
     check(parameters, toml_config)

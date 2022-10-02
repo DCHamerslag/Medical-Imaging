@@ -1,3 +1,4 @@
+from typing import Any, Tuple
 import torch.nn as nn
 import pretrainedmodels as pm
 import torch.optim as optim
@@ -10,7 +11,6 @@ def get_model(name: str):
 def get_pretrained_resnet50():
     ''' Return ResNet50 with hardcoded optimizer and scheduler. '''
     model = pm.__dict__["resnet50"](pretrained='imagenet')
-
     model.avg_pool = nn.AdaptiveAvgPool2d(1)
     model.last_linear = nn.Sequential(
         nn.BatchNorm1d(2048),
