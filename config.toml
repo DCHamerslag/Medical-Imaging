@@ -2,8 +2,8 @@
 device = "cuda"
 num_epochs = 10
 model = "ResNet50"
-rescale_w = 500
-rescale_h = 500
+rescale_w = 224
+rescale_h = 224
 batch_size = 8
 num_workers = 4
 

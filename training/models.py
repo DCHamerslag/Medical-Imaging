@@ -19,7 +19,9 @@ def get_pretrained_resnet50():
         nn.ReLU(),
         nn.BatchNorm1d(1024, eps=1e-05, momentum=0.1),
         nn.Dropout(p=0.5),
-        nn.Linear(in_features=1024, out_features=2),
+        nn.Linear(in_features=1024, out_features=128),
+        nn.Dropout(p=0.25),
+        nn.Linear(in_features=128, out_features=2),
     )
 
     plist = [
