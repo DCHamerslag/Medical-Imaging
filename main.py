@@ -1,6 +1,3 @@
-
-
-from tkinter import W
 from typing import Dict, List
 
 from cv2 import transform
