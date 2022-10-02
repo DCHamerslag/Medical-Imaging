@@ -25,26 +25,20 @@ def main(args):
         wandb.init(project="test", entity="dchamerslag")
         wandb.config.update(args)
 
-    if args.device=="cuda":
-        print("Using device: ", torch.cuda.get_device_name(0))
-        device = torch.device(0)
-    else:
-        print("Using device: cpu")
-        device = torch.device('cpu')
+    device = find_device()
 
-    # Rescale images (they are all variable dimensions)
     transform = transforms.Compose([
         Rescale((args.rescale_w, args.rescale_h)),
         ToTensor()
     ])
     split = [13000, 2000]
-   
+    train_loader, test_loader = create_dataloaders(args, transform, split)
+
     model, optimizer, scheduler = get_model(args.model)
+    model = model.to(device)
+    
     loss_fn = nn.BCEWithLogitsLoss()
     
-    train_loader, test_loader = create_dataloaders(args, transform, split)
-    model = model.to(device)
-
     training_config = {}
     training_config['dataloader'] = train_loader
     training_config['test_dataloader'] = test_loader
@@ -71,6 +65,16 @@ def create_dataloaders(args: Dict, transform: transform, split: List):
     test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     
     return train_loader, test_loader
+
+def find_device() -> torch.DeviceObjType:
+    if args.device=="cuda":
+        print("Using device: ", torch.cuda.get_device_name(0))
+        device = torch.device(0)
+    else:
+        print("Using device: cpu")
+        device = torch.device('cpu')
+
+    return device
 
 if __name__ == "__main__":  
     args = parse_args()
