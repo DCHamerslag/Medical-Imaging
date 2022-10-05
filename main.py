@@ -2,7 +2,7 @@ from typing import Dict, List
 
 from cv2 import transform
 from utils.dataset import AIROGSLiteDataset, Rescale, ToTensor
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 from torchvision import transforms, utils
 from training.models import get_model
 from utils.parser import parse_args
@@ -57,8 +57,15 @@ def main(args):
 def create_dataloaders(args: Dict, transform: transform, split: List):
     
     dataset = AIROGSLiteDataset(args, transform)
+    class_weights = [1, 1500/13500]
+    sample_weights = [0] * split[0]
+    for idx, (_,label) in enumerate(dataset.labels): ## we give each sample a weight of 1 for no glaucoma, or 1500/13500 for glaucoma
+        sample_weights[idx] = class_weights[1] if label == 'NRG' else class_weights[0]
+        if idx+1 == split[0]: break
+    sampler = WeightedRandomSampler(sample_weights, num_samples=split[0], replacement=True)
     train_set, test_set = torch.utils.data.random_split(dataset, split)
-    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=sampler) #
+    #print(len(train_set))
     test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     
     return train_loader, test_loader

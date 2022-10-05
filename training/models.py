@@ -3,10 +3,16 @@ import torch.nn as nn
 import pretrainedmodels as pm
 import torch.optim as optim
 from torch.optim import lr_scheduler
+import pytorch_pretrained_vit as ptv
+from torchsummary import summary
+#import vitmodel as vt
+
 
 def get_model(name: str):
     if name=="ResNet50":
         return get_pretrained_resnet50()
+    if name=="ViT-pretrained":
+        return get_pretrained_ViT()
 
 def get_pretrained_resnet50():
     ''' Return ResNet50 with hardcoded optimizer and scheduler. '''
@@ -30,5 +36,12 @@ def get_pretrained_resnet50():
     ]
     optimizer = optim.Adam(plist, lr=0.001)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+    return model, optimizer, scheduler
+
+def get_pretrained_ViT():
+    ## first layer is conv2d with 3 in-channels, 768 out, kernel=(16,16), stride=(16,16)
+    model = ptv.ViT('B_16', pretrained=True, num_classes=2) ## L_32 is the best model, but B_16 best size/performance.
+    optimizer = optim.Adam(model.parameters(), lr=0.001) ## not sure how to call specific blocks, ViT has blocks instead of layers.
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)    
     return model, optimizer, scheduler
 
