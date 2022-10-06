@@ -31,7 +31,7 @@ def main(args):
     split = [13000, 2000]
     train_loader, test_loader = create_dataloaders(args, transform, split)
 
-    model, optimizer, scheduler = get_model(args.model)
+    model, optimizer, scheduler = get_model(args.model, args.model_name)
     model = model.to(device)
     
     loss_fn = nn.BCEWithLogitsLoss()
@@ -52,7 +52,11 @@ def main(args):
     trainer = Trainer(training_config)
     model = trainer.train()
 
-    torch.save(model.state_dict(), "model.bin")
+    if(args.model_name == ''):
+        model_name = 'model.bin'
+    else: 
+        model_name = args.model_name
+    torch.save(model.state_dict(), model_name)
 
 def create_dataloaders(args: Dict, transform: transform, split: List):
     
@@ -65,7 +69,6 @@ def create_dataloaders(args: Dict, transform: transform, split: List):
     sampler = WeightedRandomSampler(sample_weights, num_samples=split[0], replacement=True)
     train_set, test_set = torch.utils.data.random_split(dataset, split)
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=sampler) #
-    #print(len(train_set))
     test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     
     return train_loader, test_loader
