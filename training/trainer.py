@@ -1,4 +1,5 @@
-from typing import Dict
+
+from typing import Any, Dict
 import torch
 import wandb
 from tqdm import tqdm
@@ -7,6 +8,7 @@ class Trainer():
     def __init__(self, config: Dict):
         self.model = config['model']
         self.dataloader = config['dataloader']
+        self.test_dataloader = config['test_dataloader']
         self.dataset_size = config['dataset_size']
         self.optimizer = config['optimizer']
         self.scheduler = config['scheduler']
@@ -16,17 +18,20 @@ class Trainer():
         self.logging = config['logging']
         self.batch_size = config['batch_size']
 
-    def train(self) -> any:
+    def train(self):
 
-        training_progress_bar = tqdm(total=int(self.dataset_size / self.batch_size), desc="Training progress")
+        train_pb = tqdm(total=int(self.dataset_size / self.batch_size), desc="Training progress")
         for epoch in tqdm(range(self.num_epochs - 1), "Epoch"):
-            training_progress_bar.reset()
+            train_pb.reset()
 
             self.model.train()
 
             running_loss = 0.0
+            
+            correct = {}
+            TP = TN = FN = FP = 0
             for batch_index, batch in enumerate(self.dataloader):
-                training_progress_bar.update()
+                train_pb.update()
                 inputs = batch["image"]
                 labels = batch["label"]
                 inputs = inputs.to(self.device, dtype=torch.float)
@@ -38,13 +43,38 @@ class Trainer():
                     loss = self.loss_fn(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
-
                 self.scheduler.step()
+                TP, TN, FP, FN = get_metrics(outputs, labels)
+                acc = (TP + TN) / self.batch_size
                 running_loss += loss.item() * inputs.size(0)
-                training_progress_bar.set_postfix(loss=loss.item())
-                if self.logging: wandb.log({"Loss" : loss})
+                train_pb.set_postfix(loss=loss.item(), acc=acc.item())
+                if self.logging: 
+                    wandb.log({"Loss" : loss,
+                                "TP" : TP,
+                                "TN" : TN,
+                                "FN" : FN,
+                                "FP" : FP,
+                                "Acc" : acc
+                    })
             epoch_loss = running_loss / self.dataset_size
             #print('Epoch Loss: {:.4f}'.format(epoch_loss))
             if self.logging: wandb.log({"Epoch loss" : epoch_loss})
 
         return self.model
+
+def get_metrics(outputs: torch.TensorType, labels: torch.TensorType):
+
+    preds = torch.argmax(outputs, dim=1)
+    truth = torch.argmax(labels, dim=1)
+
+    num_pos = torch.sum(labels[:,1])
+    num_neg = torch.sum(labels[:,0])
+    correct = preds[preds==truth]
+    incorrect = preds[preds!=truth]
+    TP_b = torch.count_nonzero(correct)
+    TN_b = correct.shape[0] - TP_b
+    FN = num_pos - TP_b
+    FP = num_neg - TN_b
+    TP = TP_b
+    TN = TN_b
+    return TP, TN, FP, FN
