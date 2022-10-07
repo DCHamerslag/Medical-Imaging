@@ -25,7 +25,6 @@ def parse_args() -> Namespace:
         parameters.data_dir = str(DATA)
     check(parameters, toml_config)
 
-
     return parameters
 
 def check(parameters: Namespace, toml_config: Dict) -> None:

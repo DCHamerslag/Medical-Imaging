@@ -29,7 +29,7 @@ class Trainer():
             running_loss = 0.0
             
             correct = {}
-            TP, TN, FN, FP = 0
+            TP = TN = FN = FP = 0
             for batch_index, batch in enumerate(self.dataloader):
                 train_pb.update()
                 inputs = batch["image"]

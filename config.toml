@@ -1,7 +1,8 @@
 [parameters]
-device = "cuda"
+device = "cpu"
 num_epochs = 10
 model = "ResNet50"
+model_name = ""
 rescale_w = 224
 rescale_h = 224
 batch_size = 8
