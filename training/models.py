@@ -38,7 +38,6 @@ def get_pretrained_resnet50():
     return model, optimizer, scheduler
 
 def get_pretrained_ViT(model_name:str):
-    ## first layer is conv2d with 3 in-channels, 768 out, kernel=(16,16), stride=(16,16)
     if model_name != '':
         model = ptv.ViT('B_16', pretrained=False, num_classes=2)
         model.load_state_dict(load('./models/' + model_name))
