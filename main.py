@@ -19,7 +19,7 @@ def main(args):
     print("Running with parameters: ", args)
    
     if args.logging:
-        wandb.init(project="test", entity="dchamerslag")
+        wandb.init(project="test-project", entity="airogs-project")
         wandb.config.update(args)
 
     device = find_device()

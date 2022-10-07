@@ -44,7 +44,7 @@ class Trainer():
                     loss.backward()
                     self.optimizer.step()
                 self.scheduler.step()
-                TP, TN, FP, FN += get_metrics(outputs, labels)
+                TP, TN, FP, FN = get_metrics(outputs, labels)
                 acc = (TP + TN) / self.batch_size
                 running_loss += loss.item() * inputs.size(0)
                 train_pb.set_postfix(loss=loss.item(), acc=acc.item())
