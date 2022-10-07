@@ -1,3 +1,4 @@
+
 from typing import Any, Dict
 import torch
 import wandb
@@ -28,6 +29,7 @@ class Trainer():
             running_loss = 0.0
             
             correct = {}
+            TP, TN, FN, FP = 0
             for batch_index, batch in enumerate(self.dataloader):
                 train_pb.update()
                 inputs = batch["image"]
@@ -42,25 +44,16 @@ class Trainer():
                     loss.backward()
                     self.optimizer.step()
                 self.scheduler.step()
-                #print(outputs)
-                #print(labels)
-                #print(torch.argmax(outputs, 1))
-                #print(torch.argmax(labels, dim=1))
-                preds = torch.argmax(outputs, dim=1)
-                truth = torch.argmax(labels, dim=1)
-
-                correct = preds[preds==truth]
-                incorrect = preds[preds!=truth]
-                true_pos = torch.count_nonzero(correct)
-                true_neg = correct.shape[0] - true_pos
-                acc = (true_pos + true_neg) / self.batch_size
-                #print(f"True pos {true_pos}, true neg: {true_neg}")
+                TP, TN, FP, FN += get_metrics(outputs, labels)
+                acc = (TP + TN) / self.batch_size
                 running_loss += loss.item() * inputs.size(0)
                 train_pb.set_postfix(loss=loss.item(), acc=acc.item())
                 if self.logging: 
                     wandb.log({"Loss" : loss,
-                                "TP" : true_pos,
-                                "TN" : true_neg,
+                                "TP" : TP,
+                                "TN" : TN,
+                                "FN" : FN,
+                                "FP" : FP,
                                 "Acc" : acc
                     })
             epoch_loss = running_loss / self.dataset_size
@@ -68,3 +61,20 @@ class Trainer():
             if self.logging: wandb.log({"Epoch loss" : epoch_loss})
 
         return self.model
+
+def get_metrics(outputs: torch.TensorType, labels: torch.TensorType):
+
+    preds = torch.argmax(outputs, dim=1)
+    truth = torch.argmax(labels, dim=1)
+
+    num_pos = torch.sum(labels[:,1])
+    num_neg = torch.sum(labels[:,0])
+    correct = preds[preds==truth]
+    incorrect = preds[preds!=truth]
+    TP_b = torch.count_nonzero(correct)
+    TN_b = correct.shape[0] - TP_b
+    FN = num_pos - TP_b
+    FP = num_neg - TN_b
+    TP = TP_b
+    TN = TN_b
+    return TP, TN, FP, FN
