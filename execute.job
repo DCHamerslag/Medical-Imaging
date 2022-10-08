@@ -1,6 +1,10 @@
 #!/bin/bash
 
+<<<<<<< HEAD
+#SBATCH --partition=gpu_titanrtx_shared_course
+=======
 #SBATCH --partition=gpu_shared_course
+>>>>>>> d32e8a2771f711c9e580532c11df413b9895bf64
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=Train
 #SBATCH --ntasks=1
@@ -18,5 +22,9 @@ source activate ai
 
 cp $HOME/Medical-Imaging/data/dev_labels.csv $TMPDIR
 cp -R $HOME/Medical-Imaging/data/cfp $TMPDIR
+<<<<<<< HEAD
+python main.py --data_dir $TMPDIR --logging
+=======
 
 python main.py --data_dir $TMPDIR --logging
+>>>>>>> d32e8a2771f711c9e580532c11df413b9895bf64

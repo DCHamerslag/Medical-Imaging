@@ -1,12 +1,13 @@
 [parameters]
-device = "cpu"
+device = "cuda"
 num_epochs = 10
-model = "ResNet50"
+model = "ViT-pretrained"
 model_name = ""
 rescale_w = 224
 rescale_h = 224
 batch_size = 8
 num_workers = 4
+
 
 [implemented]
 models = [

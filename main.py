@@ -17,7 +17,6 @@ from utils.paths import ROOT
 
 def main(args):
     print("Running with parameters: ", args)
-   
     if args.logging:
         wandb.init(project="test-project", entity="airogs-project")
         wandb.config.update(args)
@@ -59,18 +58,20 @@ def main(args):
     torch.save(model.state_dict(), model_name)
 
 def create_dataloaders(args: Dict, transform: transform, split: List):
-    
     dataset = AIROGSLiteDataset(args, transform)
-    class_weights = [1, 1500/13500]
-    sample_weights = [0] * split[0]
+    dataset.shuffle()               ## instead of random_split(), we shuffle the list and then just split the data in train and test by index
+    class_weights = [1, 1500/13500] ## this is more efficient for creating our sample weights, for the weightedrandomsampler
+    sample_weights = [0] * len(dataset)
     for idx, (_,label) in enumerate(dataset.labels): ## we give each sample a weight of 1 for no glaucoma, or 1500/13500 for glaucoma
         sample_weights[idx] = class_weights[1] if label == 'NRG' else class_weights[0]
-        if idx+1 == split[0]: break
-    sampler = WeightedRandomSampler(sample_weights, num_samples=split[0], replacement=True)
-    train_set, test_set = torch.utils.data.random_split(dataset, split)
-    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=sampler) #
-    test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
-    
+        
+    train_sampler = WeightedRandomSampler(sample_weights[:split[0]], num_samples=split[0], replacement=True)
+    test_sampler = WeightedRandomSampler(sample_weights[split[0]:], num_samples=split[1], replacement=True)
+    #train_set, test_set = torch.utils.data.random_split(dataset, split)
+    train_set = torch.utils.data.Subset(dataset,range(split[0]))
+    test_set = torch.utils.data.Subset(dataset,range(split[0], split[0]+split[1]))
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=train_sampler)
+    test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=test_sampler)
     return train_loader, test_loader
 
 def find_device() -> torch.DeviceObjType:

@@ -16,10 +16,14 @@ class AIROGSLiteDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.labels)
+    
+    def shuffle(self):
+        np.random.shuffle(self.labels)
 
     def __getitem__(self, idx: int) -> Dict:
         img_name, label = self.labels[idx]
         img_path = self.data_dir + "/cfp/" + img_name + ".jpg"
+        #img_path = self.data_dir + "/cropped/" + img_name + ".jpg"
         image = io.imread(img_path)
         image = np.array(image)
         assert (label=="NRG") or (label=="RG")
