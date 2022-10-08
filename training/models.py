@@ -48,7 +48,7 @@ def get_pretrained_ViT(args: Namespace):
         if args.device == 'cpu':
             model.load_state_dict(load(args.model_dir + "/" + model_name, map_location=torch.device('cpu')))
         else:
-            model.load_state_dict(load('./models/' + model_name))
+            model.load_state_dict(load(args.model_dir + "/" + model_name))
     else:
         model = ptv.ViT('B_16', pretrained=True, num_classes=2) ## L_32 is the best model, but B_16 best size/performance.
     optimizer = optim.Adam(model.parameters(), lr=0.001) ## not sure how to call specific blocks, ViT has blocks instead of layers.

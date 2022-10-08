@@ -25,7 +25,7 @@ def parse_args() -> Namespace:
         parameters.data_dir = str(DATA)
         parameters.model_dir = str(MODELS)
     else:
-        parameters.model_dir = parameters.data_dir # hacky solution for lisa scratch path
+        parameters.model_dir = parameters.data_dir + "/models" # hacky solution for lisa scratch path
     check(parameters, toml_config)
 
     return parameters

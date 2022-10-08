@@ -1,5 +1,5 @@
 [parameters]
-device = "cpu"
+device = "cuda"
 num_epochs = 10
 model = "ViT-pretrained"
 model_name = "vit_with_sampleWeights_11_epochs.bin"
