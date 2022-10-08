@@ -1,8 +1,8 @@
 [parameters]
-device = "cuda"
+device = "cpu"
 num_epochs = 10
 model = "ViT-pretrained"
-model_name = ""
+model_name = "vit_with_sampleWeights_11_epochs.bin"
 rescale_w = 224
 rescale_h = 224
 batch_size = 8

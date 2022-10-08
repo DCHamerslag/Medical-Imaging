@@ -30,7 +30,7 @@ def main(args):
     split = [13000, 2000]
     train_loader, test_loader = create_dataloaders(args, transform, split)
 
-    model, optimizer, scheduler = get_model(args.model, args.model_name)
+    model, optimizer, scheduler = get_model(args)
     model = model.to(device)
     
     loss_fn = nn.BCEWithLogitsLoss()

@@ -2,7 +2,7 @@ from argparse import ArgumentParser, Namespace
 import argparse 
 import os
 from typing import Dict
-from utils.paths import ROOT, DATA
+from utils.paths import ROOT, DATA, MODELS
 import toml
 
 def parse_args() -> Namespace:
@@ -23,6 +23,9 @@ def parse_args() -> Namespace:
     parameters = Namespace(**merge)
     if parameters.data_dir == "Default":
         parameters.data_dir = str(DATA)
+        parameters.model_dir = str(MODELS)
+    else:
+        parameters.model_dir = parameters.data_dir # hacky solution for lisa scratch path
     check(parameters, toml_config)
 
     return parameters
