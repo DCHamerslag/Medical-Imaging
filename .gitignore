@@ -2,3 +2,4 @@
 **.pyc
 /data
 /wandb
+models/vit_with_sampleWeights_11_epochs.bin
