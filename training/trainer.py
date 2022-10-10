@@ -28,7 +28,6 @@ class Trainer():
 
             running_loss = 0.0
             
-            correct = {}
             TP = TN = FN = FP = 0
             for batch_index, batch in enumerate(self.dataloader):
                 train_pb.update()
@@ -44,8 +43,8 @@ class Trainer():
                     loss.backward()
                     self.optimizer.step()
                 self.scheduler.step()
-                TP, TN, FP, FN = get_metrics(outputs, labels)
-                acc = (TP + TN) / self.batch_size
+                TP, TN, FP, FN = update_metrics(outputs, labels, TP, TN, FP, FN)
+                acc = (TP + TN) / (self.batch_size * (batch_index + 1))
                 running_loss += loss.item() * inputs.size(0)
                 train_pb.set_postfix(loss=loss.item(), acc=acc.item())
                 if self.logging: 
@@ -57,12 +56,15 @@ class Trainer():
                                 "Acc" : acc
                     })
             epoch_loss = running_loss / self.dataset_size
+            epoch_accuracy = acc
             #print('Epoch Loss: {:.4f}'.format(epoch_loss))
-            if self.logging: wandb.log({"Epoch loss" : epoch_loss})
+            if self.logging: wandb.log({"Epoch loss" : epoch_loss,
+                                        "Epoch accuracy" : epoch_accuracy})
 
         return self.model
 
-def get_metrics(outputs: torch.TensorType, labels: torch.TensorType):
+def update_metrics(outputs: torch.TensorType, labels: torch.TensorType,
+        TP: int, TN: int, FP: int, FN: int):
 
     preds = torch.argmax(outputs, dim=1)
     truth = torch.argmax(labels, dim=1)
@@ -73,8 +75,8 @@ def get_metrics(outputs: torch.TensorType, labels: torch.TensorType):
     incorrect = preds[preds!=truth]
     TP_b = torch.count_nonzero(correct)
     TN_b = correct.shape[0] - TP_b
-    FN = num_pos - TP_b
-    FP = num_neg - TN_b
-    TP = TP_b
-    TN = TN_b
+    FN += num_pos - TP_b
+    FP += num_neg - TN_b
+    TP += TP_b
+    TN += TN_b
     return TP, TN, FP, FN
