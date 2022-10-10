@@ -49,10 +49,10 @@ class Trainer():
                 train_pb.set_postfix(loss=loss.item(), acc=acc.item())
                 if self.logging: 
                     wandb.log({"Loss" : loss,
-                                "TP (%)" : TP / self.batch_size * (batch_index + 1),
-                                "TN (%)" : TN / self.batch_size * (batch_index + 1),
-                                "FN (%)" : FN / self.batch_size * (batch_index + 1),
-                                "FP (%)" : FP / self.batch_size * (batch_index + 1),
+                                "TP (%)" : TP / (self.batch_size * (batch_index + 1)),
+                                "TN (%)" : TN / (self.batch_size * (batch_index + 1)),
+                                "FN (%)" : FN / (self.batch_size * (batch_index + 1)),
+                                "FP (%)" : FP / (self.batch_size * (batch_index + 1)),
                                 "Acc" : acc
                     })
             epoch_loss = running_loss / self.dataset_size
