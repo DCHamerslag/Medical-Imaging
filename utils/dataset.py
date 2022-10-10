@@ -13,6 +13,7 @@ class AIROGSLiteDataset(Dataset):
         self.data_dir = args.data_dir
         self.labels = np.asarray(pd.read_csv(self.data_dir + "/dev_labels.csv"))
         self.transform = transform
+        self.data_name = args.data_name
 
     def __len__(self) -> int:
         return len(self.labels)
@@ -22,7 +23,7 @@ class AIROGSLiteDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict:
         img_name, label = self.labels[idx]
-        img_path = self.data_dir + "/cfp/" + img_name + ".jpg"
+        img_path = self.data_dir + "/" + self.data_name + "/" + img_name + ".jpg"
         #img_path = self.data_dir + "/cropped/" + img_name + ".jpg"
         image = io.imread(img_path)
         image = np.array(image)

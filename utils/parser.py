@@ -15,6 +15,10 @@ def parse_args() -> Namespace:
                         type = str, 
                         help = 'Datadir',
                         default="Default")
+    parser.add_argument( '--data_name', action = 'store', 
+                    type = str, 
+                    help = 'dataset name',
+                    default="cfp")
 
 
     args = parser.parse_args()
