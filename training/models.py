@@ -7,6 +7,7 @@ from torch.optim import lr_scheduler
 from torch import load
 import torch
 import pytorch_pretrained_vit as ptv
+from torchvision import models
 
 
 def get_model(args: Namespace):
@@ -15,6 +16,8 @@ def get_model(args: Namespace):
         return get_pretrained_resnet50()
     if name=="ViT-pretrained":
         return get_pretrained_ViT(args)
+    if name=="ResNet50-untrained":
+        return get_resnet50_untrained()
 
 def get_pretrained_resnet50():
     ''' Return ResNet50 with hardcoded optimizer and scheduler. '''
@@ -37,6 +40,14 @@ def get_pretrained_resnet50():
             {'params': model.last_linear.parameters(), 'lr': 5e-3}
     ]
     optimizer = optim.Adam(plist, lr=0.001)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+    return model, optimizer, scheduler
+
+def get_resnet50_untrained():
+    model = models.resnet50(pretrained=False)
+    model.fc = nn.Linear(2048, 2)
+
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
     return model, optimizer, scheduler
 
