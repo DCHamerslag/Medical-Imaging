@@ -11,7 +11,7 @@ class AIROGSLiteDataset(Dataset):
 
     def __init__(self, args, transform: transform = None) -> None:
         self.data_dir = args.data_dir
-        self.labels = np.asarray(pd.read_csv(self.data_dir + "/dev_labels.csv"))
+        self.labels = np.asarray(pd.read_csv(self.data_dir + "/dev_labels2.csv"))
         self.transform = transform
         self.data_name = args.data_name
 
