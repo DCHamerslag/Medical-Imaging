@@ -17,6 +17,7 @@ from utils.paths import ROOT
 
 def main(args):
     print("Running with parameters: ", args)
+    args.logging = True
     if args.logging:
         wandb.init(project="test-project", entity="airogs-project")
         wandb.config.update(args)
@@ -27,7 +28,7 @@ def main(args):
         Rescale((args.rescale_w, args.rescale_h)),
         ToTensor()
     ])
-    split = [13000, 2000]
+    split = [13000, 1936]
     train_loader, test_loader = create_dataloaders(args, transform, split)
 
     model, optimizer, scheduler = get_model(args)
