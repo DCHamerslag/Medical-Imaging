@@ -16,9 +16,21 @@ def parse_args() -> Namespace:
                         help = 'Datadir',
                         default="Default")
     parser.add_argument( '--data_name', action = 'store', 
-                    type = str, 
-                    help = 'dataset name',
-                    default="cfp")
+                        type = str, 
+                        help = 'dataset name',
+                        default="thing")
+    parser.add_argument( '--gamma', action = 'store', 
+                        type = float, 
+                        help = 'Scheduler gamma',
+                        default=0.1)
+    parser.add_argument( '--lr', action = 'store', 
+                        type = float, 
+                        help = 'Learning rate',
+                        default=0.001)
+    parser.add_argument( '--batch_size', action = 'store', 
+                        type = int, 
+                        help = 'Batch Size',
+                        default=8)
 
 
     args = parser.parse_args()

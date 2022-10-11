@@ -17,7 +17,7 @@ def get_model(args: Namespace):
     if name=="ViT-pretrained":
         return get_pretrained_ViT(args)
     if name=="ResNet50-untrained":
-        return get_resnet50_untrained()
+        return get_resnet50_untrained(args)
 
 def get_pretrained_resnet50():
     ''' Return ResNet50 with hardcoded optimizer and scheduler. '''
@@ -43,12 +43,12 @@ def get_pretrained_resnet50():
     scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
     return model, optimizer, scheduler
 
-def get_resnet50_untrained():
+def get_resnet50_untrained(args: Namespace):
     model = models.resnet50(pretrained=False)
     model.fc = nn.Linear(2048, 2)
 
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=args.gamma)
     return model, optimizer, scheduler
 
 def get_pretrained_ViT(args: Namespace):
@@ -62,7 +62,7 @@ def get_pretrained_ViT(args: Namespace):
             model.load_state_dict(load(args.model_dir + "/" + model_name))
     else:
         model = ptv.ViT('B_16', pretrained=True, num_classes=2) ## L_32 is the best model, but B_16 best size/performance.
-    optimizer = optim.Adam(model.parameters(), lr=0.001) ## not sure how to call specific blocks, ViT has blocks instead of layers.
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)    
+    optimizer = optim.Adam(model.parameters(), lr=args.lr) ## not sure how to call specific blocks, ViT has blocks instead of layers.
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=args.gamma)    
     return model, optimizer, scheduler
 

@@ -1,11 +1,11 @@
 [parameters]
 device = "cuda"
-num_epochs = 10
+num_epochs = 20
 model = "ViT-pretrained"
-model_name = "vit_with_sampleWeights_11_epochs.bin"
+model_name = ""
 rescale_w = 224
 rescale_h = 224
-batch_size = 8
+batch_size = 8 # doesn't do anything, is defaulted to 8 in parser.py
 num_workers = 4
 
 
