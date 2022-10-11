@@ -26,7 +26,7 @@ class AIROGSLiteDataset(Dataset):
         img_path = self.data_dir + "/" + self.data_name + "/" + img_name + ".jpg"
         #img_path = self.data_dir + "/cropped/" + img_name + ".jpg"
         image = io.imread(img_path)
-        image = np.array(image)
+        image = np.array(image) / 255
         assert (label=="NRG") or (label=="RG")
 
         if label == 'NRG':  
