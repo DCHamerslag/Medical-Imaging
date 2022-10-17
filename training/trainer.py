@@ -75,8 +75,8 @@ def update_metrics(outputs: torch.TensorType, labels: torch.TensorType,
     incorrect = preds[preds!=truth]
     TP_b = torch.count_nonzero(correct)
     TN_b = correct.shape[0] - TP_b
-    FN += num_pos - TP_b
-    FP += num_neg - TN_b
+    FP += num_pos - TP_b
+    FN += num_neg - TN_b
     TP += TP_b
     TN += TN_b
     return TP, TN, FP, FN
