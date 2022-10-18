@@ -69,8 +69,8 @@ def update_metrics(outputs: torch.TensorType, labels: torch.TensorType,
     preds = torch.argmax(outputs, dim=1)
     truth = torch.argmax(labels, dim=1)
 
-    num_pos = torch.sum(labels[:,1])
-    num_neg = torch.sum(labels[:,0])
+    num_pos = torch.sum(preds)
+    num_neg = preds.shape[0] - num_pos
     correct = preds[preds==truth]
     incorrect = preds[preds!=truth]
     TP_b = torch.count_nonzero(correct)
