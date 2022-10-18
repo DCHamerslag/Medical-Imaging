@@ -69,8 +69,8 @@ def update_metrics(outputs: torch.TensorType, labels: torch.TensorType,
     preds = torch.argmax(outputs, dim=1)
     truth = torch.argmax(labels, dim=1)
 
-    num_pos = torch.sum(preds)
-    num_neg = preds.shape[0] - num_pos
+    num_pos = torch.sum(labels[:,1])
+    num_neg = torch.sum(labels[:,0])
     correct = preds[preds==truth]
     incorrect = preds[preds!=truth]
     TP_b = torch.count_nonzero(correct)
@@ -79,4 +79,22 @@ def update_metrics(outputs: torch.TensorType, labels: torch.TensorType,
     FN += num_neg - TN_b
     TP += TP_b
     TN += TN_b
+    return TP, TN, FP, FN
+
+def update_metrics_fixed(outputs: torch.TensorType, labels: torch.TensorType,
+        TP: int, TN: int, FP: int, FN: int):
+
+    preds = torch.argmax(outputs.detach(), dim=1)
+    truth = torch.argmax(labels.detach(), dim=1)
+    for i, _ in enumerate(preds):
+        
+        if preds[i] == 1 and truth[i] == 1:
+            TP += 1
+        elif preds[i] == 1 and truth[i] == 0:
+            FP += 1
+        elif preds[i] == 0 and truth[i] == 0:
+            TN += 1
+        elif preds[i] == 0 and truth[i] == 1:
+            FN += 1
+
     return TP, TN, FP, FN
