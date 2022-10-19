@@ -34,7 +34,7 @@ def main(args):
     model, optimizer, scheduler = get_model(args)
     model = model.to(device)
     
-    loss_fn = nn.BCEWithLogitsLoss()
+    loss_fn = nn.CrossEntropyLoss()
     
     training_config = {}
     training_config['dataloader'] = train_loader
@@ -48,15 +48,10 @@ def main(args):
     training_config['device'] = device
     training_config['logging'] = args.logging
     training_config['batch_size'] = args.batch_size
+    training_config['model_name'] = args.model_name
 
     trainer = Trainer(training_config)
     model = trainer.train()
-
-    if(args.model_name == ''):
-        model_name = 'model.bin'
-    else: 
-        model_name = args.model_name
-    torch.save(model.state_dict(), model_name)
 
 def create_dataloaders(args: Dict, transform: transform, split: List):
     dataset = AIROGSLiteDataset(args, transform)
@@ -65,14 +60,13 @@ def create_dataloaders(args: Dict, transform: transform, split: List):
     sample_weights = [0] * len(dataset)
     for idx, (_,label) in enumerate(dataset.labels): ## we give each sample a weight of 1 for no glaucoma, or 1500/13500 for glaucoma
         sample_weights[idx] = class_weights[1] if label == 'NRG' else class_weights[0]
-        
+
     train_sampler = WeightedRandomSampler(sample_weights[:split[0]], num_samples=split[0], replacement=True)
-    test_sampler = WeightedRandomSampler(sample_weights[split[0]:], num_samples=split[1], replacement=True)
     #train_set, test_set = torch.utils.data.random_split(dataset, split)
     train_set = torch.utils.data.Subset(dataset,range(split[0]))
     test_set = torch.utils.data.Subset(dataset,range(split[0], split[0]+split[1]))
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=train_sampler)
-    test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=test_sampler)
+    test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     return train_loader, test_loader
 
 def find_device() -> torch.DeviceObjType:
