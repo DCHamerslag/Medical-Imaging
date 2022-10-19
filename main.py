@@ -28,13 +28,16 @@ def main(args):
         Rescale((args.rescale_w, args.rescale_h)),
         ToTensor()
     ])
-    split = [13000, 1936]
+    split = 13000, 2000
+    #split = [13000, 1936]
+    #split = [15500, 2426] ## With flipped data
     train_loader, test_loader = create_dataloaders(args, transform, split)
 
     model, optimizer, scheduler = get_model(args)
     model = model.to(device)
     
-    loss_fn = nn.CrossEntropyLoss()
+    #loss_fn = nn.CrossEntropyLoss()
+    loss_fn = nn.BCEWithLogitsLoss()
     
     training_config = {}
     training_config['dataloader'] = train_loader
@@ -57,6 +60,7 @@ def create_dataloaders(args: Dict, transform: transform, split: List):
     dataset = AIROGSLiteDataset(args, transform)
     dataset.shuffle()               ## instead of random_split(), we shuffle the list and then just split the data in train and test by index
     class_weights = [1, 1500/13500] ## this is more efficient for creating our sample weights, for the weightedrandomsampler
+    #class_weights = [1, 4485/13441] ## these weights are for our flipped dataset
     sample_weights = [0] * len(dataset)
     for idx, (_,label) in enumerate(dataset.labels): ## we give each sample a weight of 1 for no glaucoma, or 1500/13500 for glaucoma
         sample_weights[idx] = class_weights[1] if label == 'NRG' else class_weights[0]

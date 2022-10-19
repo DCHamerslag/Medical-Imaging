@@ -11,7 +11,9 @@ class AIROGSLiteDataset(Dataset):
 
     def __init__(self, args, transform: transform = None) -> None:
         self.data_dir = args.data_dir
-        self.labels = np.asarray(pd.read_csv(self.data_dir + "/dev_labels2.csv"))
+        self.labels = np.asarray(pd.read_csv(self.data_dir + "/dev_labels.csv"))
+        #self.labels = np.asarray(pd.read_csv(self.data_dir + "/dev_labels2.csv"))
+        #self.labels = np.asarray(pd.read_csv(self.data_dir + "/labels_with_flips.csv"))
         self.transform = transform
         self.data_name = args.data_name
 
@@ -24,7 +26,8 @@ class AIROGSLiteDataset(Dataset):
     def __getitem__(self, idx: int) -> Dict:
         img_name, label = self.labels[idx]
         img_path = self.data_dir + "/" + self.data_name + "/" + img_name + ".jpg"
-        #img_path = self.data_dir + "/cropped/" + img_name + ".jpg"
+        #img_path = self.data_dir + "/cropped/thing/" + img_name + ".jpg"
+        #img_path = self.data_dir + "/cropped/thing2/" + img_name + ".jpg"
         image = io.imread(img_path)
         image = np.array(image) / 255
         assert (label=="NRG") or (label=="RG")
