@@ -26,7 +26,7 @@ def parse_args() -> Namespace:
     parser.add_argument( '--lr', action = 'store', 
                         type = float, 
                         help = 'Learning rate',
-                        default=0.001)
+                        default=0.01)
     parser.add_argument( '--batch_size', action = 'store', 
                         type = int, 
                         help = 'Batch Size',

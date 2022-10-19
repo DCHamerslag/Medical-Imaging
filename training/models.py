@@ -8,6 +8,8 @@ from torch import load
 import torch
 import pytorch_pretrained_vit as ptv
 from torchvision import models
+from torch.nn.init import kaiming_uniform_
+import torch.nn.functional as F
 
 
 def get_model(args: Namespace):
@@ -18,6 +20,8 @@ def get_model(args: Namespace):
         return get_pretrained_ViT(args)
     if name=="ResNet50-untrained":
         return get_resnet50_untrained(args)
+    if name=="dummy":
+        return get_dummy(args)
 
 def get_pretrained_resnet50():
     ''' Return ResNet50 with hardcoded optimizer and scheduler. '''
@@ -32,14 +36,14 @@ def get_pretrained_resnet50():
         nn.Dropout(p=0.5),
         nn.Linear(in_features=1024, out_features=128),
         nn.Dropout(p=0.25),
-        nn.Linear(in_features=128, out_features=2),
+        nn.Linear(in_features=128, out_features=2)
     )
 
     plist = [
-            {'params': model.layer4.parameters(), 'lr': 1e-5},
-            {'params': model.last_linear.parameters(), 'lr': 5e-3}
+            {'params': model.layer4.parameters(), 'lr': 1e-4},
+            {'params': model.last_linear.parameters(), 'lr': 5e-2}
     ]
-    optimizer = optim.Adam(plist, lr=0.001)
+    optimizer = optim.Adam(plist, lr=0.01)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
     return model, optimizer, scheduler
 
@@ -66,3 +70,40 @@ def get_pretrained_ViT(args: Namespace):
     scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=args.gamma)    
     return model, optimizer, scheduler
 
+def get_dummy(args: Namespace) -> torch.nn.Module:
+    model = DummyModel()
+
+    optimizer = optim.Adam(model.parameters(), lr=args.lr) ## not sure how to call specific blocks, ViT has blocks instead of layers.
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=args.gamma) 
+    return model, optimizer, scheduler
+
+class DummyModel(torch.nn.Module):
+
+    def __init__(self):
+        super(DummyModel, self).__init__()
+        # 1 input image channel, 6 output channels, 5x5 square convolution
+        # kernel
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        # an affine operation: y = Wx + b
+        self.fc1 = nn.Linear(16 * 53 * 53, 2048)  # 53*53 from image dimension
+        #self.fc1 = nn.Linear(16 * 9 * 9, 2048)  # 53*53 from image dimension
+        self.fc2 = nn.Linear(2048, 64)
+        self.fc3 = nn.Linear(64, 1)
+        torch.nn.init.kaiming_uniform_(self.fc1.weight, nonlinearity='relu')
+        torch.nn.init.kaiming_uniform_(self.fc2.weight, nonlinearity='relu')
+        torch.nn.init.kaiming_uniform_(self.fc3.weight, nonlinearity='sigmoid')
+
+    def forward(self, x):
+        x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
+        # If the size is a square, you can specify with a single number
+        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
+
+        x = torch.flatten(x, 1) # flatten all dimensions except the batch dimension
+
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        print(x)
+        x = torch.sigmoid(x)
+        return x

@@ -46,6 +46,41 @@ class AIROGSLiteDataset(Dataset):
 
         return sample
 
+class DandelionDataset(Dataset):
+    def __init__(self, args, transform: transform = None) -> None:
+        self.dandelion_dir = 'data/dandelion/train/dandelion'
+        self.grass_dir = 'data/dandelion/train/grass'
+        self.transform = transform
+        self.data_name = args.data_name
+
+    def __len__(self) -> int:
+        return 999
+    
+    def __getitem__(self, idx: int) -> Dict:
+        
+        if idx < 500:
+            img_number = str(idx).rjust(8, '0')
+            img_path = self.dandelion_dir + "/" + img_number + ".jpg"
+            image = io.imread(img_path)
+            label = [1, 0]
+        else:
+            img_number = str(idx-500).rjust(8, '0')
+            img_path = self.grass_dir + "/" + img_number + ".jpg"
+            image = io.imread(img_path)
+            label = [0, 1]
+        sample = {
+            "image": np.array(image) / 255, 
+            "label": np.array(label)
+        }
+
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample
+        
+
+
+
 class Rescale(object):
     """Rescale the image in a sample to a given size."""
 

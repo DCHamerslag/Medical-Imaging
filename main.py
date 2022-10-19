@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from cv2 import transform
-from utils.dataset import AIROGSLiteDataset, Rescale, ToTensor
+from utils.dataset import AIROGSLiteDataset, DandelionDataset, Rescale, ToTensor
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from torchvision import transforms, utils
 from training.models import get_model
@@ -17,9 +17,9 @@ from utils.paths import ROOT
 
 def main(args):
     print("Running with parameters: ", args)
-    args.logging = True
+    #args.logging = True
     if args.logging:
-        wandb.init(project="test-project", entity="airogs-project")
+        wandb.init(project="test-project", entity="airogs-project", group="dummy model, dummy dataset")
         wandb.config.update(args)
 
     device = find_device()
@@ -35,6 +35,7 @@ def main(args):
     model = model.to(device)
     
     loss_fn = nn.BCEWithLogitsLoss()
+    #loss_fn = nn.HingeEmbeddingLoss()
     
     training_config = {}
     training_config['dataloader'] = train_loader
@@ -73,6 +74,13 @@ def create_dataloaders(args: Dict, transform: transform, split: List):
     test_set = torch.utils.data.Subset(dataset,range(split[0], split[0]+split[1]))
     train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=train_sampler)
     test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, sampler=test_sampler)
+    return train_loader, test_loader
+
+def create_dataloaders_debug(args: Dict, transform: transform, split: List):
+    dataset = DandelionDataset(args, transform)
+
+    train_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    test_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     return train_loader, test_loader
 
 def find_device() -> torch.DeviceObjType:

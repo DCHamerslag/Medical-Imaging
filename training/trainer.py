@@ -3,6 +3,8 @@ from typing import Any, Dict
 import torch
 import wandb
 from tqdm import tqdm
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Trainer():
     def __init__(self, config: Dict):
@@ -19,7 +21,7 @@ class Trainer():
         self.batch_size = config['batch_size']
 
     def train(self):
-
+        self.model.train()
         train_pb = tqdm(total=int(self.dataset_size / self.batch_size), desc="Training progress")
         for epoch in tqdm(range(self.num_epochs - 1), "Epoch"):
             train_pb.reset()
@@ -35,6 +37,7 @@ class Trainer():
                 labels = batch["label"]
                 inputs = inputs.to(self.device, dtype=torch.float)
                 labels = labels.to(self.device, dtype=torch.float)
+                
 
                 self.optimizer.zero_grad()
                 with torch.set_grad_enabled(True):
@@ -42,11 +45,11 @@ class Trainer():
                     loss = self.loss_fn(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
-                self.scheduler.step()
+                
                 TP, TN, FP, FN = update_metrics(outputs, labels, TP, TN, FP, FN)
                 acc = (TP + TN) / (self.batch_size * (batch_index + 1))
                 running_loss += loss.item() * inputs.size(0)
-                train_pb.set_postfix(loss=loss.item(), acc=acc.item())
+                train_pb.set_postfix(loss=loss.item(), acc=acc)
                 if self.logging: 
                     wandb.log({"Loss" : loss,
                                 "TP (%)" : TP / (self.batch_size * (batch_index + 1)),
@@ -55,6 +58,8 @@ class Trainer():
                                 "FP (%)" : FP / (self.batch_size * (batch_index + 1)),
                                 "Acc" : acc
                     })
+            self.scheduler.step()
+
             epoch_loss = running_loss / self.dataset_size
             epoch_accuracy = acc
             #print('Epoch Loss: {:.4f}'.format(epoch_loss))
@@ -66,17 +71,57 @@ class Trainer():
 def update_metrics(outputs: torch.TensorType, labels: torch.TensorType,
         TP: int, TN: int, FP: int, FN: int):
 
-    preds = torch.argmax(outputs, dim=1)
-    truth = torch.argmax(labels, dim=1)
+    preds = torch.argmax(outputs.detach(), dim=1)
+    truth = torch.argmax(labels.detach(), dim=1)
+    #print(preds)
+    #print(truth)
+    #correct = preds == truth
+    #print(correct)
+    for i, _ in enumerate(preds):
+        
+        if preds[i] == 1 and truth[i] == 1:
+            TP += 1
+        elif preds[i] == 1 and truth[i] == 0:
+            FP += 1
+        elif preds[i] == 0 and truth[i] == 0:
+            TN += 1
+        elif preds[i] == 0 and truth[i] == 1:
+            FN += 1
 
-    num_pos = torch.sum(labels[:,1])
-    num_neg = torch.sum(labels[:,0])
-    correct = preds[preds==truth]
-    incorrect = preds[preds!=truth]
-    TP_b = torch.count_nonzero(correct)
-    TN_b = correct.shape[0] - TP_b
-    FN += num_pos - TP_b
-    FP += num_neg - TN_b
-    TP += TP_b
-    TN += TN_b
+    return TP, TN, FP, FN
+
+def update_metrics2(outputs: torch.TensorType, labels: torch.TensorType,
+        TP: int, TN: int, FP: int, FN: int):
+
+    predsx = outputs.detach().to('cpu').flatten().numpy()
+    preds = np.zeros_like(predsx)
+    for i, pred in enumerate(predsx):
+        if pred > 0.5:
+            preds[i] = 1
+        if pred <= 0.5:
+            preds[i] = 0
+    print(preds)
+    truth = labels.detach().to('cpu').flatten().numpy()
+    num_pos = np.sum(truth)
+    correct = preds == truth
+    correct = correct.astype(int)
+
+
+    incorrect = preds != truth
+    incorrect = incorrect.astype(int)
+    
+    #print(f"preds: {preds}")
+    #print(f"truth: {truth}")
+    #print(f"correct: {correct}")
+    for i, _ in enumerate(preds):
+        
+        if preds[i] == 1 and correct[i] == 1:
+            TP += 1
+        elif preds[i] == 1 and correct[i] == 0:
+            FP += 1
+        elif preds[i] == 0 and correct[i] == 0:
+            TN += 1
+        elif preds[i] == 0 and correct[i] == 1:
+            FN += 1
+
     return TP, TN, FP, FN
