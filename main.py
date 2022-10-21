@@ -29,7 +29,7 @@ def main(args):
         ToTensor()
     ])
     split = [13000, 1936]
-    train_loader, test_loader = create_dataloaders(args, transform, split)
+    train_loader, test_loader = create_dataloaders_debug(args, transform, split)
 
     model, optimizer, scheduler = get_model(args)
     model = model.to(device)
@@ -43,7 +43,7 @@ def main(args):
     training_config['model'] = model
     training_config['optimizer'] = optimizer
     training_config['scheduler'] = scheduler
-    training_config['dataset_size'] = split[0]
+    training_config['dataset_size'] = len(train_loader) * args.batch_size
     training_config['num_epochs'] = args.num_epochs
     training_config['loss_fn'] = loss_fn
     training_config['device'] = device
