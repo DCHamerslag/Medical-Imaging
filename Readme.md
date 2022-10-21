@@ -1,6 +1,5 @@
 # Airogs-Lite Challenge submission
 ## Setup
-Using conda: 
 ``` bash
 conda env create -f env.yml
 conda activate airogs
