@@ -54,16 +54,16 @@ def get_resnet50_untrained():
 def get_pretrained_ViT(args: Namespace):
     model_name = args.model_name
     if model_name != '':
-        model = ptv.ViT('B_32', pretrained=False, num_classes=2)
+        model = ptv.ViT('B_16', pretrained=False, num_classes=2)
         print(args.device)
         if args.device == 'cpu':
             model.load_state_dict(load(args.model_dir + "/" + model_name, map_location=torch.device('cpu')))
         else:
             model.load_state_dict(load(args.model_dir + "/" + model_name))
     else:
-        #model = ptv.ViT('B_16', pretrained=True, num_classes=2) ## L_32 is the best model, but B_16 best size/performance.
-        model = ptv.ViT('B_32', pretrained=False, num_classes=2, image_size=224) ##imagenet1k uses a 384x384 for finetuning
-    optimizer = optim.Adam(model.parameters(), lr=1e-5) ## not sure how to call specific blocks, ViT has blocks instead of layers.
-    scheduler = lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.2)    
+        model = ptv.ViT('B_16', pretrained=True, num_classes=2) ## B_16 is slightly more accurate, but B_32 trains way faster
+        #model = ptv.ViT('B_32', pretrained=False, num_classes=2, image_size=224) ##imagenet1k uses a 384x384 for finetuning
+    optimizer = optim.Adam(model.parameters(), lr=1e-6) ## not sure how to call specific blocks, ViT has blocks instead of layers.
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)    
     return model, optimizer, scheduler
 
